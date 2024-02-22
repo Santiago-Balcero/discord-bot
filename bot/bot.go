@@ -60,14 +60,16 @@ func newMessage(discord *discordgo.Session, message *discordgo.MessageCreate) {
 		Content: message.Content,
 	}
 	log.Println("Message: ", msg)
+
 	// prevent bot responding to its own messages
 	if message.Author.ID == discord.State.User.ID {
 		return
 	}
+
 	switch {
-	case strings.Contains(message.Content, "!help"):
-		discord.ChannelMessageSend(message.ChannelID, "Hello!")
-	case strings.Contains(message.Content, "!bye"):
-		discord.ChannelMessageSend(message.ChannelID, "Bye!")
+	case strings.ToLower(message.Content) == "new":
+		discord.ChannelMessageSend(message.ChannelID, "New game is about to start! Enter name of opponent.")
+	case strings.ToLower(message.Content) == "end":
+		discord.ChannelMessageSend(message.ChannelID, "Game has ended!")
 	}
 }
