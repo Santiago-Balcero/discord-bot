@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"strings"
 
+	services "github.com/Santiago-Balcero/discord-bot/services/spotify"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -61,17 +62,30 @@ func newMessage(discord *discordgo.Session, message *discordgo.MessageCreate) {
 		},
 		Content: message.Content,
 	}
-	log.Println("Message: ", msg)
 
 	// prevent bot responding to its own messages
 	if message.Author.ID == discord.State.User.ID {
 		return
 	}
 
+	log.Println("Message: ", msg)
+
+	messageContent := strings.ToLower(message.Content)
+
 	switch {
-	case strings.ToLower(message.Content) == "new":
-		discord.ChannelMessageSend(message.ChannelID, "New game is about to start! Enter name of opponent.")
-	case strings.ToLower(message.Content) == "end":
-		discord.ChannelMessageSend(message.ChannelID, "Game has ended!")
+	case strings.Contains(messageContent, "get-artist"):
+		discord.ChannelMessageSend(message.ChannelID, "Searching artist data...")
+		artistName := strings.Split(messageContent, ":")[1]
+		artistName = strings.TrimSpace(artistName)
+		artistName = strings.ReplaceAll(artistName, " ", "-")
+		log.Println("Request for get-artist:", artistName)
+		artistData, err := services.GetArtist(artistName)
+		if err != nil {
+			log.Println("Error:", err)
+			discord.ChannelMessageSend(message.ChannelID, "Can't give you artist data. Try again.")
+			return
+		}
+		log.Println("get-artist response:", artistData)
+		discord.ChannelMessageSend(message.ChannelID, artistData.ToString())
 	}
 }
