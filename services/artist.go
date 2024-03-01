@@ -10,17 +10,17 @@ import (
 	"github.com/zmb3/spotify"
 )
 
-func GetArtist(client *spotify.Client, artistName string) (models.Artist, error) {
+func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	var artistData models.Artist
 	artistData, err := searchArtist(client, artistName)
 	if err != nil {
-		return artistData, err
+		return "", err
 	}
 	err = analyseArtist(client, &artistData)
 	if err != nil {
-		return artistData, err
+		return "", err
 	}
-	return artistData, nil
+	return toString(&artistData), nil
 }
 
 func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
@@ -125,4 +125,47 @@ func checkArtistMaximums(albumData *models.Album, artistData *models.Artist) {
 		artistData.MaxEnergy = albumData.MaxEnergy
 		artistData.MaxEnergyTrack = albumData.MaxEnergyTrack
 	}
+}
+
+func toString(artist *models.Artist) string {
+	genres := "Genres: not found"
+	if len(artist.Genres) > 0 {
+		genres = fmt.Sprintf("Genres: %s", strings.Join(artist.Genres, ", "))
+	}
+	popularity := fmt.Sprintf("Popularity: %v", artist.Popularity)
+	followers := fmt.Sprintf("Followers: %v", artist.Followers)
+	danceability := fmt.Sprintf("To dance: %s", artist.MaxDanceabilityTrack)
+	energy := fmt.Sprintf("To jump: %s", artist.MaxEnergyTrack)
+	albums := fmt.Sprintf("Total albums: %v", artist.AlbumsCount)
+	tracks := fmt.Sprintf("Total tracks: %v", artist.TracksCount)
+	albumsInfo := "Albums:\n"
+	for i := range artist.Albums {
+		tracksText := "tracks"
+		if artist.Albums[i].TracksCount == 1 {
+			tracksText = "track"
+		}
+		albumsInfo += fmt.Sprintf(
+			"\t• %s (%s), %s, %v %s.\n",
+			artist.Albums[i].Name,
+			strings.Split(artist.Albums[i].ReleaseDate, "-")[0],
+			artist.Albums[i].Type,
+			artist.Albums[i].TracksCount,
+			tracksText,
+		)
+	}
+
+	artistStr := fmt.Sprintf(
+		"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+		strings.ToUpper(artist.Name),
+		artist.Url,
+		genres,
+		popularity,
+		followers,
+		danceability,
+		energy,
+		albums,
+		tracks,
+		albumsInfo,
+	)
+	return artistStr
 }

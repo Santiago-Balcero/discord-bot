@@ -48,7 +48,7 @@ func GetArtist(discord *discordgo.Session, message *discordgo.MessageCreate) {
 		artistName := strings.Split(messageContent, ":")[1]
 		artistName = strings.TrimSpace(artistName)
 		log.Println("Request for get artist:", artistName)
-		artistData, err := services.GetArtist(&client, artistName)
+		artistStr, err := services.GetArtist(&client, artistName)
 		if err != nil {
 			log.Println("[ARTIST HANDLER] Error in GetArtist:", err)
 			discord.ChannelMessageSend(
@@ -57,9 +57,9 @@ func GetArtist(discord *discordgo.Session, message *discordgo.MessageCreate) {
 			)
 			return
 		}
-		log.Println("[ARTIST HANDLER] get artist response:", artistData)
+		log.Println("[ARTIST HANDLER] get artist response:", artistStr)
 		discord.ChannelMessageSend(message.ChannelID, "Artist data:\n")
-		discord.ChannelMessageSend(message.ChannelID, artistData.ToString())
+		discord.ChannelMessageSend(message.ChannelID, artistStr)
 	default:
 		log.Println("Invalid command")
 		discord.ChannelMessageSend(message.ChannelID, "Invalid command.")
