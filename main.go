@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"os"
 
 	bot "github.com/Santiago-Balcero/discord-bot/bot"
+	"github.com/Santiago-Balcero/discord-bot/config"
 	"github.com/joho/godotenv"
 )
 
@@ -13,7 +13,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env")
 	}
-	token := os.Getenv("BOT_TOKEN")
-	bot.BotToken = token
+
+	config.LoadConfig()
+
 	bot.Run()
 }

@@ -47,10 +47,9 @@ type Track struct {
 }
 
 func (a *Artist) ToString() string {
-	title := "Got your artist!"
-	genres := "Genres: not found."
+	genres := "Genres: not found"
 	if len(a.Genres) > 0 {
-		genres = fmt.Sprintf("Genres: %s.", strings.Join(a.Genres, ", "))
+		genres = fmt.Sprintf("Genres: %s", strings.Join(a.Genres, ", "))
 	}
 	popularity := fmt.Sprintf("Popularity: %v", a.Popularity)
 	followers := fmt.Sprintf("Followers: %v", a.Followers)
@@ -75,8 +74,7 @@ func (a *Artist) ToString() string {
 	}
 
 	artist := fmt.Sprintf(
-		"%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
-		title,
+		"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 		strings.ToUpper(a.Name),
 		a.Url,
 		genres,
