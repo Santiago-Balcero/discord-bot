@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/Santiago-Balcero/discord-bot/models"
 	"github.com/Santiago-Balcero/discord-bot/utils"
@@ -29,17 +30,19 @@ func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
 		return fmt.Errorf("error in GetArtist: %v", err)
 	}
 
+	loc, _ := time.LoadLocation("America/Bogota")
+	startTime := time.Now().In(loc)
+
 	albums, err := client.GetArtistAlbums(spotify.ID(artistData.Id))
 	if err != nil {
 		return fmt.Errorf("error in GetArtistAlbums: %v", err)
 	}
 
-	albumsData := []models.Album{}
-
 	for _, album := range albums.Albums {
-		artistData.AlbumsCount++
 		tracks, err := client.GetAlbumTracks(album.ID)
-		utils.CheckError(err)
+		if err != nil {
+			return fmt.Errorf("error in GetAlbumTracks: %v", err)
+		}
 		albumData := models.Album{
 			Name:        album.Name,
 			Type:        album.AlbumType,
@@ -62,11 +65,12 @@ func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
 				albumData.TracksCount++
 			}
 		}
-		albumsData = append(albumsData, albumData)
+		addToArtistDiscography(&albumData, artistData)
 		checkArtistMaximums(&albumData, artistData)
 	}
 
-	artistData.Albums = albumsData
+	fetchTime := time.Since(startTime)
+	log.Println("Artist data was fetched in:", fetchTime)
 	return nil
 }
 
@@ -127,6 +131,19 @@ func checkArtistMaximums(albumData *models.Album, artistData *models.Artist) {
 	}
 }
 
+func addToArtistDiscography(albumData *models.Album, artist *models.Artist) {
+	if albumData.Type == "album" {
+		artist.Albums = append(artist.Albums, *albumData)
+		artist.AlbumsCount++
+	} else if albumData.Type == "single" {
+		artist.Singles = append(artist.Singles, *albumData)
+		artist.SinglesCount++
+	} else if albumData.Type == "compialtion" {
+		artist.Compilations = append(artist.Compilations, *albumData)
+		artist.CompilationsCount++
+	}
+}
+
 func toString(artist *models.Artist) string {
 	genres := "Genres: not found"
 	if len(artist.Genres) > 0 {
@@ -137,25 +154,48 @@ func toString(artist *models.Artist) string {
 	danceability := fmt.Sprintf("To dance: %s", artist.MaxDanceabilityTrack)
 	energy := fmt.Sprintf("To jump: %s", artist.MaxEnergyTrack)
 	albums := fmt.Sprintf("Total albums: %v", artist.AlbumsCount)
+	singles := fmt.Sprintf("Total singles: %v", artist.SinglesCount)
+	compilations := fmt.Sprintf("Total compilations: %v", artist.CompilationsCount)
 	tracks := fmt.Sprintf("Total tracks: %v", artist.TracksCount)
-	albumsInfo := "Albums:\n"
+
+	albumsInfo := "Albums:"
 	for i := range artist.Albums {
 		tracksText := "tracks"
 		if artist.Albums[i].TracksCount == 1 {
 			tracksText = "track"
 		}
 		albumsInfo += fmt.Sprintf(
-			"\t• %s (%s), %s, %v %s.\n",
+			"\n\t• %s (%s), %v %s.",
 			artist.Albums[i].Name,
 			strings.Split(artist.Albums[i].ReleaseDate, "-")[0],
-			artist.Albums[i].Type,
 			artist.Albums[i].TracksCount,
 			tracksText,
 		)
 	}
 
+	singlesInfo := ""
+	for i := range artist.Singles {
+		singlesInfo = "\nSingles:"
+		singlesInfo += fmt.Sprintf(
+			"\n\t• %s (%s).",
+			artist.Singles[i].Name,
+			strings.Split(artist.Singles[i].ReleaseDate, "-")[0],
+		)
+	}
+
+	compilationsInfo := ""
+	for i := range artist.Compilations {
+		compilationsInfo = "\nCompilations:"
+		compilationsInfo += fmt.Sprintf(
+			"\n\t• %s (%s) - track: %s.",
+			artist.Compilations[i].Name,
+			strings.Split(artist.Compilations[i].ReleaseDate, "-")[0],
+			artist.Compilations[i].Tracks[0].Name,
+		)
+	}
+
 	artistStr := fmt.Sprintf(
-		"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+		"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s%s%s",
 		strings.ToUpper(artist.Name),
 		artist.Url,
 		genres,
@@ -164,8 +204,12 @@ func toString(artist *models.Artist) string {
 		danceability,
 		energy,
 		albums,
+		singles,
+		compilations,
 		tracks,
 		albumsInfo,
+		singlesInfo,
+		compilationsInfo,
 	)
 	return artistStr
 }

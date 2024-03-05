@@ -10,6 +10,8 @@ type Artist struct {
 	Name                 string   `json:"name"`
 	Popularity           int      `json:"popularity"`
 	Albums               []Album  `json:"albums"`
+	Singles              []Album  `json:"singles"`
+	Compilations         []Album  `josn:"compilations"`
 	Genres               []string `json:"genres"`
 	Url                  string   `json:"url"`
 	Followers            int      `json:"followers"`
@@ -19,6 +21,8 @@ type Artist struct {
 	MaxEnergy            float32  `json:"maxEnergy"`
 	MaxEnergyTrack       string   `json:"maxEnergyTrack"`
 	AlbumsCount          int      `json:"albumsCount"`
+	SinglesCount         int      `json:"singlesCount"`
+	CompilationsCount    int      `json:"compilationsCount"`
 	TracksCount          int      `json:"tracksCount"`
 }
 
