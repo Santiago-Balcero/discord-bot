@@ -40,14 +40,14 @@ func GetArtist(discord *discordgo.Session, message *discordgo.MessageCreate) {
 	messageContent := strings.ToLower(message.Content)
 
 	switch {
-	case messageContent[:11] == "get artist:":
+	case messageContent[:11] == "!artist:":
 		discord.ChannelMessageSend(
 			message.ChannelID,
 			"Searching artist data...",
 		)
 		artistName := strings.Split(messageContent, ":")[1]
 		artistName = strings.TrimSpace(artistName)
-		log.Println("Request for get artist:", artistName)
+		log.Println("Request for !artist:", artistName)
 		artistStr, err := services.GetArtist(&client, artistName)
 		if err != nil {
 			log.Println("[ARTIST HANDLER] Error in GetArtist:", err)
@@ -57,7 +57,7 @@ func GetArtist(discord *discordgo.Session, message *discordgo.MessageCreate) {
 			)
 			return
 		}
-		log.Println("[ARTIST HANDLER] get artist response:", artistStr)
+		log.Println("[ARTIST HANDLER] !artist response:", artistStr)
 		discord.ChannelMessageSend(message.ChannelID, "Artist data:\n")
 		discord.ChannelMessageSend(message.ChannelID, artistStr)
 	default:
