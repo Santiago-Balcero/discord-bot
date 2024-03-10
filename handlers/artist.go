@@ -1,67 +1,74 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/Santiago-Balcero/discord-bot/config"
-	"github.com/Santiago-Balcero/discord-bot/models"
-	services "github.com/Santiago-Balcero/discord-bot/services"
+	"github.com/Santiago-Balcero/discord-bot/services"
 	"github.com/bwmarrin/discordgo"
 )
 
-func GetArtist(discord *discordgo.Session, message *discordgo.MessageCreate) {
-	client, err := config.GetClient()
-	if err != nil {
-		log.Println("Error:", err)
-		discord.ChannelMessageSend(
-			message.ChannelID,
-			"Service unavailable. Try again.",
+func GetArtist(
+	discord *discordgo.Session,
+	interaction *discordgo.InteractionCreate,
+) {
+	client := config.Spotify
+	data := interaction.ApplicationCommandData()
+
+	log.Println(
+		"Interaction received - command:",
+		data.Name,
+		"- value:",
+		data.Options[0].StringValue(),
+	)
+
+	switch data.Name {
+	case "artist":
+		artistName := strings.TrimSpace(data.Options[0].StringValue())
+		log.Println("Artist name:", artistName)
+
+		// To keep active interaction
+		err := discord.InteractionRespond(
+			interaction.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+			},
 		)
-	}
-	msg := models.Message{
-		Author: models.Author{
-			ID:       message.Author.ID,
-			Email:    message.Author.Email,
-			Locale:   message.Author.Locale,
-			Username: message.Author.Username,
-			Verified: message.Author.Verified,
-		},
-		Content: message.Content,
-	}
+		if err != nil {
+			log.Println("Error in InteractionRespond:", err)
+		}
 
-	// prevent bot responding to its own messages
-	if message.Author.ID == discord.State.User.ID {
-		return
-	}
-
-	log.Println("Message received:", msg)
-
-	messageContent := strings.ToLower(message.Content)
-
-	switch {
-	case messageContent[:11] == "!artist:":
-		discord.ChannelMessageSend(
-			message.ChannelID,
-			"Searching artist data...",
-		)
-		artistName := strings.Split(messageContent, ":")[1]
-		artistName = strings.TrimSpace(artistName)
-		log.Println("Request for !artist:", artistName)
 		artistStr, err := services.GetArtist(&client, artistName)
 		if err != nil {
-			log.Println("[ARTIST HANDLER] Error in GetArtist:", err)
-			discord.ChannelMessageSend(
-				message.ChannelID,
-				"Can't find artist data. Try again.",
+			log.Println("[Artist handler] Error in GetArtist:", err)
+			_, _ = discord.FollowupMessageCreate(
+				interaction.Interaction,
+				true,
+				&discordgo.WebhookParams{
+					Content: fmt.Sprintf(
+						"Artist not found: %s",
+						artistName,
+					),
+				},
 			)
 			return
 		}
-		log.Println("[ARTIST HANDLER] !artist response:", artistStr)
-		discord.ChannelMessageSend(message.ChannelID, "Artist data:\n")
-		discord.ChannelMessageSend(message.ChannelID, artistStr)
-	default:
-		log.Println("Invalid command")
-		discord.ChannelMessageSend(message.ChannelID, "Invalid command.")
+
+		artistLog := strings.ReplaceAll(artistStr, "\n", " ")
+		artistLog = strings.ReplaceAll(artistLog, "\t", " ")
+		log.Println("[Artist handler] /artist response:", artistLog)
+
+		_, err = discord.FollowupMessageCreate(
+			interaction.Interaction,
+			true,
+			&discordgo.WebhookParams{
+				Content: artistStr,
+			},
+		)
+		if err != nil {
+			log.Println("Error sending response message:", err)
+		}
 	}
 }

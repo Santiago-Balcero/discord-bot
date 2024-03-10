@@ -2,13 +2,15 @@ package config
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-func GetClient() (spotify.Client, error) {
+var Spotify spotify.Client
+
+func CreateSpotifyClient() {
 	authConfig := &clientcredentials.Config{
 		ClientID:     SpotifyId,
 		ClientSecret: SpotifySecret,
@@ -17,9 +19,7 @@ func GetClient() (spotify.Client, error) {
 
 	accessToken, err := authConfig.Token(context.Background())
 	if err != nil {
-		return spotify.Authenticator{}.NewClient(nil),
-			fmt.Errorf("error creating spotify client")
+		log.Fatal("Error creating spotify client: ", err)
 	}
-
-	return spotify.Authenticator{}.NewClient(accessToken), nil
+	Spotify = spotify.Authenticator{}.NewClient(accessToken)
 }

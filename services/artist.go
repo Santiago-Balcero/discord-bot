@@ -145,20 +145,20 @@ func addToArtistDiscography(albumData *models.Album, artist *models.Artist) {
 }
 
 func toString(artist *models.Artist) string {
-	genres := "Genres: not found"
+	genres := "**Genres:** not found"
 	if len(artist.Genres) > 0 {
-		genres = fmt.Sprintf("Genres: %s", strings.Join(artist.Genres, ", "))
+		genres = fmt.Sprintf("**Genres:** %s", strings.Join(artist.Genres, ", "))
 	}
-	popularity := fmt.Sprintf("Popularity: %v", artist.Popularity)
-	followers := fmt.Sprintf("Followers: %v", artist.Followers)
-	danceability := fmt.Sprintf("To dance: %s", artist.MaxDanceabilityTrack)
-	energy := fmt.Sprintf("To jump: %s", artist.MaxEnergyTrack)
+	popularity := fmt.Sprintf("**Popularity:** %v", artist.Popularity)
+	followers := fmt.Sprintf("**Followers:** %v", artist.Followers)
+	danceability := fmt.Sprintf("**To dance:** %s", artist.MaxDanceabilityTrack)
+	energy := fmt.Sprintf("**Full of energy:** %s", artist.MaxEnergyTrack)
 	albums := fmt.Sprintf("Total albums: %v", artist.AlbumsCount)
 	singles := fmt.Sprintf("Total singles: %v", artist.SinglesCount)
 	compilations := fmt.Sprintf("Total compilations: %v", artist.CompilationsCount)
 	tracks := fmt.Sprintf("Total tracks: %v", artist.TracksCount)
 
-	albumsInfo := "Albums:"
+	albumsInfo := "**Albums:**"
 	for i := range artist.Albums {
 		tracksText := "tracks"
 		if artist.Albums[i].TracksCount == 1 {
@@ -175,17 +175,25 @@ func toString(artist *models.Artist) string {
 
 	singlesInfo := ""
 	for i := range artist.Singles {
-		singlesInfo = "\nSingles:"
+		singlesInfo = "\n\n**Singles:**"
+		tracksText := ""
+		if artist.Singles[i].TracksCount > 1 {
+			tracksText = fmt.Sprintf(
+				", %v tracks",
+				artist.Singles[i].TracksCount,
+			)
+		}
 		singlesInfo += fmt.Sprintf(
-			"\n\t• %s (%s).",
+			"\n\t• %s (%s)%s.",
 			artist.Singles[i].Name,
 			strings.Split(artist.Singles[i].ReleaseDate, "-")[0],
+			tracksText,
 		)
 	}
 
 	compilationsInfo := ""
 	for i := range artist.Compilations {
-		compilationsInfo = "\nCompilations:"
+		compilationsInfo = "\n\n**Compilations:**"
 		compilationsInfo += fmt.Sprintf(
 			"\n\t• %s (%s) - track: %s.",
 			artist.Compilations[i].Name,
@@ -195,8 +203,8 @@ func toString(artist *models.Artist) string {
 	}
 
 	artistStr := fmt.Sprintf(
-		"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s%s%s",
-		strings.ToUpper(artist.Name),
+		"%s\n%s\n\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n%s\n%s\n\n%s%s%s",
+		fmt.Sprintf("**%s**", strings.ToUpper(artist.Name)),
 		artist.Url,
 		genres,
 		popularity,
