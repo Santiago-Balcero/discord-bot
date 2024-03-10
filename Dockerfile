@@ -1,15 +1,13 @@
-# syntax=docker/dockerfile:1
-
 FROM golang:1.22.0
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 COPY go.mod go.sum ./
 
-RUN go mod download
+RUN go mod download && go mod verify
 
-COPY *.go ./
+COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /discord-spotify-bot
+RUN go build -v -o /usr/src/app ./...
 
-CMD ["/discord-spotify-bot"]
+CMD ["/usr/src/app/discord-spotify-bot"]
