@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"discord-spotify-bot/utils"
+
 	"github.com/joho/godotenv"
 )
 

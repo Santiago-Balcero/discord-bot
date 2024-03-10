@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"discord-spotify-bot/models"
+
 	"github.com/zmb3/spotify"
 )
 
