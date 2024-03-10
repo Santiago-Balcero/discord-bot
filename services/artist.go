@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Santiago-Balcero/discord-bot/models"
-	"github.com/Santiago-Balcero/discord-bot/utils"
+	"discord-spotify-bot/models"
+	"discord-spotify-bot/utils"
 	"github.com/zmb3/spotify"
 )
 

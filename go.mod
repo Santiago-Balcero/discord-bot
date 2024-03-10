@@ -1,4 +1,4 @@
-module github.com/Santiago-Balcero/discord-bot
+module discord-spotify-bot
 
 go 1.22.0
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Santiago-Balcero/discord-bot/config"
-	"github.com/Santiago-Balcero/discord-bot/handlers"
+	"discord-spotify-bot/config"
+	"discord-spotify-bot/handlers"
 	"github.com/bwmarrin/discordgo"
 )
 

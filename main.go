@@ -1,8 +1,8 @@
 package main
 
 import (
-	bot "github.com/Santiago-Balcero/discord-bot/bot"
-	"github.com/Santiago-Balcero/discord-bot/config"
+	bot "discord-spotify-bot/bot"
+	"discord-spotify-bot/config"
 )
 
 func main() {

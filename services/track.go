@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 
-	"github.com/Santiago-Balcero/discord-bot/models"
+	"discord-spotify-bot/models"
 	"github.com/zmb3/spotify"
 )
 

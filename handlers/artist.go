@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/Santiago-Balcero/discord-bot/config"
-	"github.com/Santiago-Balcero/discord-bot/services"
+	"discord-spotify-bot/config"
+	"discord-spotify-bot/services"
 	"github.com/bwmarrin/discordgo"
 )
 
