@@ -8,7 +8,7 @@ import (
 	"github.com/zmb3/spotify"
 )
 
-func AnalysePodcast(client *spotify.Client, podcastId string) {
+func AnalysePodcast(client *spotify.Client, podcastId string) (string, error) {
 	podcast, err := client.GetShow(podcastId)
 	utils.CheckError(err)
 
@@ -23,4 +23,5 @@ func AnalysePodcast(client *spotify.Client, podcastId string) {
 	for _, ep := range episodes.Episodes {
 		fmt.Println("\tEpisode name:", ep.Name)
 	}
+	return "Analyse Podcast EOF", nil
 }
