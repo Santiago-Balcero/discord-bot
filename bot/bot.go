@@ -55,7 +55,7 @@ func Run() {
 	}
 
 	// add an event handler
-	discord.AddHandler(handlers.GetArtist)
+	discord.AddHandler(handlers.HandleInteraction)
 
 	// open websocket session
 	err = discord.Open()
