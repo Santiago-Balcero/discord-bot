@@ -4,22 +4,26 @@ import (
 	"context"
 	"log"
 
-	"github.com/zmb3/spotify"
+	spotifyauth "github.com/zmb3/spotify/v2/auth"
+
+	"github.com/zmb3/spotify/v2"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
 var Spotify spotify.Client
 
 func CreateSpotifyClient() {
+	ctx := context.Background()
 	authConfig := &clientcredentials.Config{
 		ClientID:     SpotifyId,
 		ClientSecret: SpotifySecret,
-		TokenURL:     spotify.TokenURL,
+		TokenURL:     spotifyauth.TokenURL,
 	}
 
-	accessToken, err := authConfig.Token(context.Background())
+	accessToken, err := authConfig.Token(ctx)
 	if err != nil {
 		log.Fatal("Error creating spotify client: ", err)
 	}
-	Spotify = spotify.Authenticator{}.NewClient(accessToken)
+	httpClient := spotifyauth.New().Client(ctx, accessToken)
+	Spotify = *spotify.New(httpClient)
 }

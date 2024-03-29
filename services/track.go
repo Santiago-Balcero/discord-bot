@@ -1,15 +1,17 @@
 package services
 
 import (
+	"context"
 	"fmt"
 
 	"discord-spotify-bot/models"
 
-	"github.com/zmb3/spotify"
+	"github.com/zmb3/spotify/v2"
 )
 
 func AnalyseTrack(client *spotify.Client, track *models.Track) error {
-	features, err := client.GetAudioFeatures(spotify.ID(track.Id))
+	ctx := context.Background()
+	features, err := client.GetAudioFeatures(ctx, spotify.ID(track.Id))
 	if err != nil {
 		return fmt.Errorf("error in GetAudioFeatures: %v", err)
 	}

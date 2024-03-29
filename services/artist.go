@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -9,24 +10,65 @@ import (
 	"discord-spotify-bot/models"
 	"discord-spotify-bot/utils"
 
-	"github.com/zmb3/spotify"
+	"github.com/zmb3/spotify/v2"
 )
 
 func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	var artistData models.Artist
-	artistData, err := searchArtist(client, artistName)
+	ctx := context.Background()
+	artistData, err := searchArtist(client, artistName, ctx)
 	if err != nil {
 		return "", err
 	}
-	err = analyseArtist(client, &artistData)
+	err = analyseArtist(client, &artistData, ctx)
 	if err != nil {
 		return "", err
 	}
 	return toString(&artistData), nil
 }
 
-func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
-	artist, err := client.GetArtist((spotify.ID(artistData.Id)))
+func searchArtist(
+	client *spotify.Client,
+	artistName string,
+	ctx context.Context,
+) (models.Artist, error) {
+	artist := models.Artist{}
+	result, err := client.Search(ctx, artistName, spotify.SearchTypeArtist)
+	if err != nil {
+		return artist, fmt.Errorf("error searching artist: %v", err)
+	}
+
+	artistFound := false
+
+	for _, a := range result.Artists.Artists {
+		name := utils.ClearString(a.Name)
+		if name == strings.ReplaceAll(artistName, " ", "") {
+			artist.Id = a.ID.String()
+			artist.Name = a.Name
+			artist.Popularity = a.Popularity
+			artist.Genres = a.Genres
+			artist.Url = a.ExternalURLs["spotify"]
+			artist.Followers = int(a.Followers.Count)
+			artist.Image = string(a.Images[2].URL)
+			log.Println("Artist found:", artist.Name, artist.Url)
+			artistFound = true
+			break
+		}
+	}
+
+	if !artistFound {
+		return artist, fmt.Errorf("artist not found")
+	}
+
+	return artist, nil
+}
+
+func analyseArtist(
+	client *spotify.Client,
+	artistData *models.Artist,
+	ctx context.Context,
+) error {
+	artist, err := client.GetArtist(ctx, spotify.ID(artistData.Id))
 	if err != nil {
 		return fmt.Errorf("error in GetArtist: %v", err)
 	}
@@ -34,13 +76,24 @@ func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
 	loc, _ := time.LoadLocation("America/Bogota")
 	startTime := time.Now().In(loc)
 
-	albums, err := client.GetArtistAlbums(spotify.ID(artistData.Id))
+	albumTypesSearch := []spotify.AlbumType{
+		spotify.AlbumTypeAlbum,
+		spotify.AlbumTypeAppearsOn,
+		spotify.AlbumTypeCompilation,
+		spotify.AlbumTypeSingle,
+	}
+
+	albums, err := client.GetArtistAlbums(
+		ctx,
+		spotify.ID(artistData.Id),
+		albumTypesSearch,
+	)
 	if err != nil {
 		return fmt.Errorf("error in GetArtistAlbums: %v", err)
 	}
 
 	for _, album := range albums.Albums {
-		tracks, err := client.GetAlbumTracks(album.ID)
+		tracks, err := client.GetAlbumTracks(ctx, album.ID)
 		if err != nil {
 			return fmt.Errorf("error in GetAlbumTracks: %v", err)
 		}
@@ -73,41 +126,6 @@ func analyseArtist(client *spotify.Client, artistData *models.Artist) error {
 	fetchTime := time.Since(startTime)
 	log.Println("Artist data was fetched in:", fetchTime)
 	return nil
-}
-
-func searchArtist(
-	client *spotify.Client,
-	artistName string,
-) (models.Artist, error) {
-	artist := models.Artist{}
-	result, err := client.Search(artistName, spotify.SearchTypeArtist)
-	if err != nil {
-		return artist, fmt.Errorf("error searching artist: %v", err)
-	}
-
-	artistFound := false
-
-	for _, a := range result.Artists.Artists {
-		name := utils.ClearString(a.Name)
-		if name == strings.ReplaceAll(artistName, " ", "") {
-			artist.Id = a.ID.String()
-			artist.Name = a.Name
-			artist.Popularity = a.Popularity
-			artist.Genres = a.Genres
-			artist.Url = a.ExternalURLs["spotify"]
-			artist.Followers = int(a.Followers.Count)
-			artist.Image = string(a.Images[2].URL)
-			log.Println("Artist found:", artist.Name, artist.Url)
-			artistFound = true
-			break
-		}
-	}
-
-	if !artistFound {
-		return artist, fmt.Errorf("artist not found")
-	}
-
-	return artist, nil
 }
 
 func checkAlbumMaximums(trackData *models.Track, albumData *models.Album) {

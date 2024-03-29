@@ -1,14 +1,17 @@
 package services
 
 import (
+	"context"
 	"fmt"
 
 	"discord-spotify-bot/utils"
 
-	"github.com/zmb3/spotify"
+	"github.com/zmb3/spotify/v2"
 )
 
 func GetRecommendations(client *spotify.Client) {
+	ctx := context.Background()
+
 	seed := spotify.Seeds{
 		Artists: []spotify.ID{
 			spotify.ID(""),
@@ -27,15 +30,10 @@ func GetRecommendations(client *spotify.Client) {
 	trackAttributes.MinDanceability(0.7)
 	trackAttributes.MinEnergy(0.6)
 
-	country := "BR"
-	options := spotify.Options{
-		Country: &country,
-	}
-
 	recommendations, err := client.GetRecommendations(
+		ctx,
 		seed,
 		trackAttributes,
-		&options,
 	)
 	utils.CheckError(err)
 

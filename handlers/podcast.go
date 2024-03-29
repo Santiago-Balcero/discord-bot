@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/zmb3/spotify"
+	"github.com/zmb3/spotify/v2"
 )
 
 func GetPodcast(
@@ -30,7 +30,7 @@ func GetPodcast(
 		log.Println("Error in InteractionRespond:", err)
 	}
 
-	podcastStr, err := services.AnalysePodcast(&client, podcastName)
+	podcastStr, err := services.GetPodcast(&client, podcastName)
 	if err != nil {
 		log.Println("[Podcast handler] Error in GetPodcast:", err)
 		_, _ = discord.FollowupMessageCreate(
