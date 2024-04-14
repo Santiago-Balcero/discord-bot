@@ -16,11 +16,11 @@ import (
 func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	var artistData models.Artist
 	ctx := context.Background()
-	artistData, err := searchArtist(client, artistName, ctx)
+	artistData, err := searchArtist(ctx, client, artistName)
 	if err != nil {
 		return "", err
 	}
-	err = analyseArtist(client, &artistData, ctx)
+	err = analyseArtist(ctx, client, &artistData)
 	if err != nil {
 		return "", err
 	}
@@ -28,9 +28,9 @@ func GetArtist(client *spotify.Client, artistName string) (string, error) {
 }
 
 func searchArtist(
+	ctx context.Context,
 	client *spotify.Client,
 	artistName string,
-	ctx context.Context,
 ) (models.Artist, error) {
 	artist := models.Artist{}
 	result, err := client.Search(ctx, artistName, spotify.SearchTypeArtist)
@@ -64,9 +64,9 @@ func searchArtist(
 }
 
 func analyseArtist(
+	ctx context.Context,
 	client *spotify.Client,
 	artistData *models.Artist,
-	ctx context.Context,
 ) error {
 	artist, err := client.GetArtist(ctx, spotify.ID(artistData.Id))
 	if err != nil {

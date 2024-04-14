@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
+	"discord-spotify-bot/models"
 	"discord-spotify-bot/utils"
 
 	"github.com/zmb3/spotify/v2"
@@ -12,60 +15,85 @@ import (
 
 func GetPodcast(client *spotify.Client, podcastName string) (string, error) {
 	ctx := context.Background()
-	podcast, err := searchPodcast(ctx, client, podcastName)
+	podcastData, err := searchPodcast(ctx, client, podcastName)
 	if err != nil {
 		return "", err
 	}
-	data, err := analysePodcast(ctx, client, podcast)
+	err = analysePodcast(ctx, client, &podcastData)
 	if err != nil {
 		return "", err
 	}
-	return data, nil
+
+	return "OK", nil
 }
 
 func searchPodcast(
 	ctx context.Context,
 	client *spotify.Client,
 	podcastName string,
-) (string, error) {
-	result, err := client.Search(ctx, podcastName, spotify.SearchTypeShow)
+) (models.Podcast, error) {
+	podcast := models.Podcast{}
+
+	options := []spotify.RequestOption{
+		spotify.Market("CO"),
+	}
+
+	result, err := client.Search(ctx, podcastName, spotify.SearchTypeShow, options...)
 	if err != nil {
-		return "", fmt.Errorf("error searching podcast: %v", err)
+		return podcast, fmt.Errorf("error searching podcast: %v", err)
 	}
 
 	podcastFound := false
-	log.Println(result.Shows)
 
-	for _, a := range result.Shows.Shows {
-		// TODO as in artist service
-		log.Println(a)
+	for _, s := range result.Shows.Shows {
+		name := utils.ClearString(s.Name)
+		if name == strings.ReplaceAll(podcastName, " ", "") {
+			podcast.Id = s.ID.String()
+			podcast.Name = s.Name
+			podcast.Description = s.Description
+			podcast.Publisher = s.Publisher
+			podcast.Url = s.ExternalURLs["spotify"]
+			podcast.Image = string(s.Images[2].URL)
+			log.Println("Podcast found:", podcast.Name, podcast.Url)
+			podcastFound = true
+			break
+		}
 	}
 
 	if !podcastFound {
-		return "", fmt.Errorf("podcast not found")
+		return podcast, fmt.Errorf("podcast not found")
 	}
 
-	return "", nil
+	return podcast, nil
 }
 
 func analysePodcast(
 	ctx context.Context,
 	client *spotify.Client,
-	podcastId string,
-) (string, error) {
-	podcast, err := client.GetShow(ctx, spotify.ID(podcastId))
-	utils.CheckError(err)
+	podcastData *models.Podcast,
+) error {
+	loc, _ := time.LoadLocation("America/Bogota")
+	startTime := time.Now().In(loc)
 
-	fmt.Println("Podcast name:", podcast.Name)
-	fmt.Println("Description:", podcast.Description)
-	fmt.Println("Publisher:", podcast.Publisher)
-	fmt.Println("Episodes endpoint:", podcast.Episodes.Endpoint)
-
-	episodes, err := client.GetShowEpisodes(ctx, podcastId)
-	utils.CheckError(err)
+	episodes, err := client.GetShowEpisodes(ctx, podcastData.Id)
+	if err != nil {
+		return fmt.Errorf("error in GetShowEpisodes: %v", err)
+	}
 
 	for _, ep := range episodes.Episodes {
-		fmt.Println("\tEpisode name:", ep.Name)
+		podcastData.EpisodesCount++
+		episode := models.Episode{
+			Id:          ep.ID.String(),
+			Name:        ep.Name,
+			Description: ep.Description,
+			DurationMs:  ep.Duration_ms,
+			ReleaseDate: ep.ReleaseDate,
+		}
+		podcastData.DurationMs += ep.Duration_ms
+		podcastData.Episodes = append(podcastData.Episodes, episode)
 	}
-	return "Analyse Podcast EOF", nil
+
+	fetchTime := time.Since(startTime)
+	log.Println("Podcast data was fetched in:", fetchTime)
+	return nil
 }
