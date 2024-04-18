@@ -46,7 +46,9 @@ func GetPodcast(
 		return
 	}
 
-	log.Println("[Podcast handler] /podcast response:", podcastStr)
+	podcastLog := strings.ReplaceAll(podcastStr, "\n", " ")
+	podcastLog = strings.ReplaceAll(podcastLog, "\t", " ")
+	log.Println("[Podcast handler] /podcast response:", podcastLog)
 
 	_, err = discord.FollowupMessageCreate(
 		interaction.Interaction,

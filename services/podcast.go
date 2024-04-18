@@ -24,7 +24,7 @@ func GetPodcast(client *spotify.Client, podcastName string) (string, error) {
 		return "", err
 	}
 
-	return "OK", nil
+	return podcastToString(&podcastData), nil
 }
 
 func searchPodcast(
@@ -96,4 +96,33 @@ func analysePodcast(
 	fetchTime := time.Since(startTime)
 	log.Println("Podcast data was fetched in:", fetchTime)
 	return nil
+}
+
+func podcastToString(podcast *models.Podcast) string {
+	publisher := fmt.Sprintf("**Publisher:** %s", podcast.Publisher)
+	description := fmt.Sprintf("**Description:** %s", podcast.Description)
+	episodes := fmt.Sprintf("Total episodes: %v", podcast.EpisodesCount)
+	duration := fmt.Sprintf("Total duration: %v", podcast.DurationMs)
+
+	episodesInfo := "**Episodes:**"
+	for i := range podcast.Episodes {
+		episodesInfo += fmt.Sprintf(
+			"\n\t• %s (%s), %v",
+			podcast.Episodes[i].Name,
+			strings.ReplaceAll(podcast.Episodes[i].ReleaseDate, "-", "/"),
+			podcast.Episodes[i].DurationMs,
+		)
+	}
+
+	podcastStr := fmt.Sprintf(
+		"%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n%s",
+		fmt.Sprintf("**%s**", strings.ToUpper(podcast.Name)),
+		podcast.Url,
+		publisher,
+		description,
+		episodes,
+		duration,
+		episodesInfo,
+	)
+	return podcastStr
 }

@@ -24,7 +24,7 @@ func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return toString(&artistData), nil
+	return artistToString(&artistData), nil
 }
 
 func searchArtist(
@@ -163,7 +163,7 @@ func addToArtistDiscography(albumData *models.Album, artist *models.Artist) {
 	}
 }
 
-func toString(artist *models.Artist) string {
+func artistToString(artist *models.Artist) string {
 	genres := "**Genres:** not found"
 	if len(artist.Genres) > 0 {
 		genres = fmt.Sprintf("**Genres:** %s", strings.Join(artist.Genres, ", "))
