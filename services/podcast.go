@@ -104,8 +104,8 @@ func podcastToString(podcast *models.Podcast) string {
 	episodes := fmt.Sprintf("Total episodes: %v", podcast.EpisodesCount)
 	duration := fmt.Sprintf("Total duration: %v", podcast.DurationMs)
 
-	episodesInfo := "**Episodes:**"
-	for i := range podcast.Episodes {
+	episodesInfo := "**Last 10 episodes:**"
+	for i := 0; i < 10; i++ {
 		episodesInfo += fmt.Sprintf(
 			"\n\t• %s (%s), %v",
 			podcast.Episodes[i].Name,
