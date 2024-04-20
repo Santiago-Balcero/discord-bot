@@ -1,1 +1,1 @@
-web: /usr/src/app/discord-spotify-bot
+web: bundle exec /usr/src/app/discord-spotify-bot
