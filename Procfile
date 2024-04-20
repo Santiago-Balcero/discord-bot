@@ -1,1 +1,1 @@
-worker: /usr/src/app/discord-spotify-bot
+web: /usr/src/app/discord-spotify-bot
