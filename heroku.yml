@@ -1,3 +1,5 @@
 build:
-  run:
-    web: discord-spotify-bot
+  docker:
+    web: Dockerfile
+run:
+  web: discord-spotify-bot
