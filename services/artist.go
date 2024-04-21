@@ -141,11 +141,11 @@ func artistToString(artist *models.Artist) string {
 		genres = fmt.Sprintf("**Genres:** %s", strings.Join(artist.Genres, ", "))
 	}
 	popularity := fmt.Sprintf("**Popularity:** %v", artist.Popularity)
-	followers := fmt.Sprintf("**Followers:** %v", artist.Followers)
+	followers := fmt.Sprintf("**Followers:** %v", utils.FormatInteger(artist.Followers))
 	albums := fmt.Sprintf("Total albums: %v", artist.AlbumsCount)
 	singles := fmt.Sprintf("Total singles: %v", artist.SinglesCount)
 	compilations := fmt.Sprintf("Total compilations: %v", artist.CompilationsCount)
-	tracks := fmt.Sprintf("Total tracks: %v", artist.TracksCount)
+	tracks := fmt.Sprintf("Total tracks: %v", utils.FormatInteger(artist.TracksCount))
 
 	albumsInfo := "**Albums:**"
 	for i := range artist.Albums {
