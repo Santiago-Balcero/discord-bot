@@ -1,1 +1,1 @@
-web: go run main.go
+web: /usr/src/app/discord-spotify-bot
