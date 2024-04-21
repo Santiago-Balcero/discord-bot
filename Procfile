@@ -1,1 +1,1 @@
-web: ./bin/discord-spotify-bot
+web: /bin/discord-spotify-bot
