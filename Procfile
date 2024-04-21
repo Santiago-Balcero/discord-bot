@@ -1,1 +1,1 @@
-web: /usr/src/app/discord-spotify-bot
+web: ./bin/discord-spotify-bot
