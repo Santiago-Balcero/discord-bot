@@ -18,7 +18,7 @@ func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	ctx := context.Background()
 	artistData, err := searchArtist(ctx, client, artistName)
 	if err != nil {
-		return fmt.Sprintf("Artist not found: %s", artistData.Name), err
+		return fmt.Sprintf("Artist not found: %s", artistName), err
 	}
 	err = analyseArtist(ctx, client, &artistData)
 	if err != nil {

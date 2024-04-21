@@ -17,7 +17,7 @@ func GetPodcast(client *spotify.Client, podcastName string) (string, error) {
 	ctx := context.Background()
 	podcastData, err := searchPodcast(ctx, client, podcastName)
 	if err != nil {
-		return fmt.Sprintf("Podcast not found: %s", podcastData.Name), err
+		return fmt.Sprintf("Podcast not found: %s", podcastName), err
 	}
 	err = analysePodcast(ctx, client, &podcastData)
 	if err != nil {
