@@ -1,1 +1,1 @@
-web: discord-spotify-bot
+web: go run main.go
