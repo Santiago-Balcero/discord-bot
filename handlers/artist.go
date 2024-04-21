@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"discord-spotify-bot/services"
-	"fmt"
 	"log"
 	"strings"
 
@@ -37,10 +36,7 @@ func GetArtist(
 			interaction.Interaction,
 			true,
 			&discordgo.WebhookParams{
-				Content: fmt.Sprintf(
-					"Artist not found: %s",
-					artistName,
-				),
+				Content: artistStr,
 			},
 		)
 		return

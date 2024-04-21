@@ -17,11 +17,11 @@ func GetPodcast(client *spotify.Client, podcastName string) (string, error) {
 	ctx := context.Background()
 	podcastData, err := searchPodcast(ctx, client, podcastName)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("Podcast not found: %s", podcastData.Name), err
 	}
 	err = analysePodcast(ctx, client, &podcastData)
 	if err != nil {
-		return "", err
+		return "Please try again in a few minutes.", err
 	}
 
 	return podcastToString(&podcastData), nil
