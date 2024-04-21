@@ -110,10 +110,10 @@ func podcastToString(podcast *models.Podcast) string {
 	episodesInfo := "**Last 10 episodes:**"
 	for i := 0; i < 10; i++ {
 		episodesInfo += fmt.Sprintf(
-			"\n\t• %s (%s), %v",
+			"\n\t• %s (%s), %s",
 			podcast.Episodes[i].Name,
 			strings.ReplaceAll(podcast.Episodes[i].ReleaseDate, "-", "/"),
-			podcast.Episodes[i].DurationMs,
+			utils.MillisecondsToTime(podcast.Episodes[i].DurationMs),
 		)
 	}
 
