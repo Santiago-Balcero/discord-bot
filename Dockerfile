@@ -14,4 +14,4 @@ RUN go build -v -o /usr/src/app ./...
 
 RUN rm -rf go.mod go.sum *.go .env .gitignore .todo *.md
 
-CMD ["/bin/discord-spotify-bot"]
+CMD ["/usr/src/app/discord-spotify-bot"]
