@@ -1,1 +1,1 @@
-worker: discord-spotify-bot
+web: discord-spotify-bot
