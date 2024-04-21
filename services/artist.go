@@ -142,8 +142,6 @@ func artistToString(artist *models.Artist) string {
 	}
 	popularity := fmt.Sprintf("**Popularity:** %v", artist.Popularity)
 	followers := fmt.Sprintf("**Followers:** %v", artist.Followers)
-	danceability := fmt.Sprintf("**To dance:** %s", artist.MaxDanceabilityTrack)
-	energy := fmt.Sprintf("**Full of energy:** %s", artist.MaxEnergyTrack)
 	albums := fmt.Sprintf("Total albums: %v", artist.AlbumsCount)
 	singles := fmt.Sprintf("Total singles: %v", artist.SinglesCount)
 	compilations := fmt.Sprintf("Total compilations: %v", artist.CompilationsCount)
@@ -194,14 +192,12 @@ func artistToString(artist *models.Artist) string {
 	}
 
 	artistStr := fmt.Sprintf(
-		"%s\n%s\n\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n%s\n%s\n\n%s%s%s",
+		"%s\n%s\n\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s\n\n%s%s%s",
 		fmt.Sprintf("**%s**", strings.ToUpper(artist.Name)),
 		artist.Url,
 		genres,
 		popularity,
 		followers,
-		danceability,
-		energy,
 		albums,
 		singles,
 		compilations,
