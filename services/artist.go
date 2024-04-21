@@ -110,44 +110,16 @@ func analyseArtist(
 					Id:   track.ID.String(),
 					Name: track.Name,
 				}
-				err := AnalyseTrack(client, &trackData)
-				if err != nil {
-					return fmt.Errorf("error in AnalyseTrack: %v", err)
-				}
-				checkAlbumMaximums(&trackData, &albumData)
 				albumData.Tracks = append(albumData.Tracks, trackData)
 				albumData.TracksCount++
 			}
 		}
 		addToArtistDiscography(&albumData, artistData)
-		checkArtistMaximums(&albumData, artistData)
 	}
 
 	fetchTime := time.Since(startTime)
 	log.Println("Artist data was fetched in:", fetchTime)
 	return nil
-}
-
-func checkAlbumMaximums(trackData *models.Track, albumData *models.Album) {
-	if trackData.Danceability > albumData.MaxDanceability {
-		albumData.MaxDanceability = trackData.Danceability
-		albumData.MaxDanceabilityTrack = trackData.Name
-	}
-	if trackData.Energy > albumData.MaxEnergy {
-		albumData.MaxEnergy = trackData.Energy
-		albumData.MaxEnergyTrack = trackData.Name
-	}
-}
-
-func checkArtistMaximums(albumData *models.Album, artistData *models.Artist) {
-	if albumData.MaxDanceability > artistData.MaxDanceability {
-		artistData.MaxDanceability = albumData.MaxDanceability
-		artistData.MaxDanceabilityTrack = albumData.MaxDanceabilityTrack
-	}
-	if albumData.MaxEnergy > artistData.MaxEnergy {
-		artistData.MaxEnergy = albumData.MaxEnergy
-		artistData.MaxEnergyTrack = albumData.MaxEnergyTrack
-	}
 }
 
 func addToArtistDiscography(albumData *models.Album, artist *models.Artist) {
