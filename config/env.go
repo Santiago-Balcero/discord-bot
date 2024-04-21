@@ -23,7 +23,7 @@ func LoadConfig() {
 
 	port := os.Getenv("PORT")
 	log.Println("Assigned port:", port)
-	http.ListenAndServe(":"+port, nil)
+	go http.ListenAndServe(":"+port, nil)
 	SpotifyId = os.Getenv("SPOTIFY_ID")
 	SpotifySecret = os.Getenv("SPOTIFY_KEY")
 	BotToken = os.Getenv("BOT_TOKEN")
