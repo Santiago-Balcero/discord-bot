@@ -16,9 +16,7 @@ func HandleInteraction(
 	data := interaction.ApplicationCommandData()
 
 	log.Println(
-		"Interaction received - user:",
-		data.Resolved.Users,
-		"- command:",
+		"Interaction received - command:",
 		data.Name,
 		"- value:",
 		data.Options[0].StringValue(),
