@@ -20,6 +20,7 @@ func LoadConfig() {
 		}
 	}
 
+	port := os.Getenv("PORT")
 	SpotifyId = os.Getenv("SPOTIFY_ID")
 	SpotifySecret = os.Getenv("SPOTIFY_KEY")
 	BotToken = os.Getenv("BOT_TOKEN")
