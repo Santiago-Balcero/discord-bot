@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	"discord-spotify-bot/interfaces"
 	"discord-spotify-bot/models"
 
 	"github.com/zmb3/spotify/v2"
 )
 
-func AnalyseTrack(client *spotify.Client, track *models.Track) error {
+func AnalyseTrack(client interfaces.SpotifyClient, track *models.Track) error {
 	ctx := context.Background()
 	features, err := client.GetAudioFeatures(ctx, spotify.ID(track.Id))
 	if err != nil {
