@@ -9,4 +9,4 @@ By Santiago Balcero
 
 ### Testing
 
-`go test -v ./...`
+`go test -v -cover -coverprofile=c.out ./... && go tool cover -html=c.out -o coverage.html`

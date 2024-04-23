@@ -17,10 +17,6 @@ func FormatInteger(num int) string {
 	}
 	formattedStr = numStr[:length-3*dots] + formattedStr
 
-	if formattedStr[0] == '.' {
-		formattedStr = formattedStr[1:]
-	}
-
 	return formattedStr
 }
 

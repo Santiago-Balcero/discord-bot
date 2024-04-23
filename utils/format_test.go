@@ -17,9 +17,9 @@ func TestFormatIntegerOne(t *testing.T) {
 }
 
 func TestFormatIntegerThousands(t *testing.T) {
-	result := FormatInteger(9999)
+	result := FormatInteger(99999)
 	assert.Equal(t,
-		"9.999",
+		"99.999",
 		result,
 		"Should format integers greater than 999",
 	)
