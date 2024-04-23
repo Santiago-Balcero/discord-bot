@@ -94,11 +94,11 @@ func TestMillisecondsToTimeHours(t *testing.T) {
 }
 
 func TestMillisecondsToTimeDays(t *testing.T) {
-	result := MillisecondsToTime(9000000)
+	result := MillisecondsToTime(90000000)
 	assert.Equal(
 		t,
 		"01:00:00",
 		result,
-		"Should format 7200000 ms as 01:00:00",
+		"Should format 90000000 ms as 01:00:00",
 	)
 }

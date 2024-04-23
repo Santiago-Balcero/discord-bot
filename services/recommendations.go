@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"discord-spotify-bot/utils"
-
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -30,12 +28,11 @@ func GetRecommendations(client *spotify.Client) {
 	trackAttributes.MinDanceability(0.7)
 	trackAttributes.MinEnergy(0.6)
 
-	recommendations, err := client.GetRecommendations(
+	recommendations, _ := client.GetRecommendations(
 		ctx,
 		seed,
 		trackAttributes,
 	)
-	utils.CheckError(err)
 
 	for _, track := range recommendations.Tracks {
 		fmt.Printf(
