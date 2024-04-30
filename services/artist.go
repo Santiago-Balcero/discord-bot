@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"discord-spotify-bot/models"
+	"discord-spotify-bot/repositories"
 	"discord-spotify-bot/utils"
 
 	"github.com/zmb3/spotify/v2"
@@ -15,8 +16,15 @@ import (
 
 func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	var artistData models.Artist
+	artistData, err := repositories.GetArtist(artistName)
+	if err != nil {
+		return "Error in database", err
+	}
+	if artistData.Name != "" {
+		return artistToString(&artistData), nil
+	}
 	ctx := context.Background()
-	artistData, err := searchArtist(ctx, client, artistName)
+	artistData, err = searchArtist(ctx, client, artistName)
 	if err != nil {
 		return fmt.Sprintf("Artist not found: %s", artistName), err
 	}
@@ -24,6 +32,7 @@ func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	if err != nil {
 		return "Please try again in a few minutes.", err
 	}
+	// TODO save artist data in DB
 	return artistToString(&artistData), nil
 }
 
@@ -98,28 +107,63 @@ func analyseArtist(
 			return fmt.Errorf("error in GetAlbumTracks: %v", err)
 		}
 		albumData := models.Album{
+			Id: album.ID.String(),
 			Name:        album.Name,
 			Type:        album.AlbumType,
 			ReleaseDate: album.ReleaseDate,
+			Url: album.ExternalURLs["spotify"],
+			Image: string(album.Images[2].URL),
 			Tracks:      []models.Track{},
 		}
 		for _, track := range tracks.Tracks {
 			if utils.ArtistInList(track.Artists, artist.Name) {
 				artistData.TracksCount++
+				albumData.DurationMs += track.Duration
+				albumData.DurationMs += track.Duration
 				trackData := models.Track{
-					Id:   track.ID.String(),
-					Name: track.Name,
+					Id:         track.ID.String(),
+					Name:       track.Name,
+					Url: track.ExternalURLs["spotify"],
+					DurationMs: track.Duration,
 				}
+				err := AnalyseTrack(client, &trackData)
+				if err != nil {
+					return fmt.Errorf("error in AnalyseTrack: %v", err)
+				}
+				checkAlbumMaximums(&trackData, &albumData)
 				albumData.Tracks = append(albumData.Tracks, trackData)
 				albumData.TracksCount++
 			}
 		}
 		addToArtistDiscography(&albumData, artistData)
+		checkArtistMaximums(&albumData, artistData)
 	}
 
 	fetchTime := time.Since(startTime)
 	log.Println("Artist data was fetched in:", fetchTime)
 	return nil
+}
+
+func checkAlbumMaximums(trackData *models.Track, albumData *models.Album) {
+	if trackData.Danceability > albumData.MaxDanceability {
+		albumData.MaxDanceability = trackData.Danceability
+		albumData.MaxDanceabilityTrack = trackData.Name
+	}
+	if trackData.Energy > albumData.MaxEnergy {
+		albumData.MaxEnergy = trackData.Energy
+		albumData.MaxEnergyTrack = trackData.Name
+	}
+}
+
+func checkArtistMaximums(albumData *models.Album, artistData *models.Artist) {
+	if albumData.MaxDanceability > artistData.MaxDanceability {
+		artistData.MaxDanceability = albumData.MaxDanceability
+		artistData.MaxDanceabilityTrack = albumData.MaxDanceabilityTrack
+	}
+	if albumData.MaxEnergy > artistData.MaxEnergy {
+		artistData.MaxEnergy = albumData.MaxEnergy
+		artistData.MaxEnergyTrack = albumData.MaxEnergyTrack
+	}
 }
 
 func addToArtistDiscography(albumData *models.Album, artist *models.Artist) {

@@ -7,6 +7,7 @@ import (
 
 func main() {
 	config.LoadConfig()
+	config.ConnectToDB()
 	config.CreateSpotifyClient()
 	bot.Run()
 }

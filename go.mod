@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.9.0
 	github.com/zmb3/spotify/v2 v2.4.1
 	golang.org/x/oauth2 v0.18.0
