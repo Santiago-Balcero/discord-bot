@@ -13,7 +13,7 @@ import (
 
 func AnalyseTrack(client interfaces.SpotifyClient, track *models.Track) error {
 	ctx := context.Background()
-	features, err := client.GetAudioFeatures(ctx, spotify.ID(track.Id))
+	features, err := client.GetAudioFeatures(ctx, spotify.ID(track.SpotifyId))
 	if err != nil {
 		return fmt.Errorf("error in GetAudioFeatures: %v", err)
 	}

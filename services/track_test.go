@@ -27,11 +27,11 @@ func TestAnalyseTrack(t *testing.T) {
 	mockClient := new(MockSpotifyClient)
 
 	track := &models.Track{
-		Id:   "your_track_id",
-		Name: "Your Track Name",
+		SpotifyId: "your_track_id",
+		Name:      "Your Track Name",
 	}
 
-	mockClient.On("GetAudioFeatures", mock.Anything, []spotify.ID{spotify.ID(track.Id)}).
+	mockClient.On("GetAudioFeatures", mock.Anything, []spotify.ID{spotify.ID(track.SpotifyId)}).
 		Return([]*spotify.AudioFeatures{{Danceability: 0.8, Energy: 0.7}}, nil)
 
 	err := AnalyseTrack(mockClient, track)

@@ -16,23 +16,32 @@ import (
 
 func GetArtist(client *spotify.Client, artistName string) (string, error) {
 	var artistData models.Artist
-	artistData, err := repositories.GetArtist(artistName)
-	if err != nil {
-		return "Error in database", err
-	}
-	if artistData.Name != "" {
-		return artistToString(&artistData), nil
-	}
 	ctx := context.Background()
-	artistData, err = searchArtist(ctx, client, artistName)
+	artistData, err := searchArtist(ctx, client, artistName)
 	if err != nil {
 		return fmt.Sprintf("Artist not found: %s", artistName), err
 	}
+
+	dbArtist, err := repositories.GetArtist(artistData.Name)
+	if err != nil {
+		return "Internal error.", err
+	}
+	if dbArtist.Name != "" {
+		log.Println("Artist found in database")
+		err = getArtistAlbums(dbArtist.ArtistId, &dbArtist)
+		if err != nil {
+			return "Internal error.", err
+		}
+		return artistToString(&dbArtist), nil
+	}
+
 	err = analyseArtist(ctx, client, &artistData)
 	if err != nil {
 		return "Please try again in a few minutes.", err
 	}
-	// TODO save artist data in DB
+	if err = saveArtistData(&artistData); err != nil {
+		return "Internal error.", err
+	}
 	return artistToString(&artistData), nil
 }
 
@@ -52,7 +61,7 @@ func searchArtist(
 	for _, a := range result.Artists.Artists {
 		name := utils.ClearString(a.Name)
 		if name == strings.ReplaceAll(artistName, " ", "") {
-			artist.Id = a.ID.String()
+			artist.SpotifyId = a.ID.String()
 			artist.Name = a.Name
 			artist.Popularity = a.Popularity
 			artist.Genres = a.Genres
@@ -77,7 +86,7 @@ func analyseArtist(
 	client *spotify.Client,
 	artistData *models.Artist,
 ) error {
-	artist, err := client.GetArtist(ctx, spotify.ID(artistData.Id))
+	artist, err := client.GetArtist(ctx, spotify.ID(artistData.SpotifyId))
 	if err != nil {
 		return fmt.Errorf("error in GetArtist: %v", err)
 	}
@@ -94,7 +103,7 @@ func analyseArtist(
 
 	albums, err := client.GetArtistAlbums(
 		ctx,
-		spotify.ID(artistData.Id),
+		spotify.ID(artistData.SpotifyId),
 		albumTypesSearch,
 	)
 	if err != nil {
@@ -107,12 +116,12 @@ func analyseArtist(
 			return fmt.Errorf("error in GetAlbumTracks: %v", err)
 		}
 		albumData := models.Album{
-			Id: album.ID.String(),
+			SpotifyId:   album.ID.String(),
 			Name:        album.Name,
 			Type:        album.AlbumType,
 			ReleaseDate: album.ReleaseDate,
-			Url: album.ExternalURLs["spotify"],
-			Image: string(album.Images[2].URL),
+			Url:         album.ExternalURLs["spotify"],
+			Image:       string(album.Images[2].URL),
 			Tracks:      []models.Track{},
 		}
 		for _, track := range tracks.Tracks {
@@ -121,9 +130,9 @@ func analyseArtist(
 				albumData.DurationMs += track.Duration
 				albumData.DurationMs += track.Duration
 				trackData := models.Track{
-					Id:         track.ID.String(),
+					SpotifyId:  track.ID.String(),
 					Name:       track.Name,
-					Url: track.ExternalURLs["spotify"],
+					Url:        track.ExternalURLs["spotify"],
 					DurationMs: track.Duration,
 				}
 				err := AnalyseTrack(client, &trackData)
@@ -263,4 +272,125 @@ func artistToString(artist *models.Artist) string {
 		compilationsInfo,
 	)
 	return artistStr
+}
+
+func saveArtistData(artist *models.Artist) error {
+	newArtistId, err := repositories.SaveArtist(*artist)
+	if err != nil {
+		return fmt.Errorf("artist %s not saved: %v", artist.Name, err)
+	}
+	log.Println(
+		"Artist",
+		fmt.Sprintf("\"%s\"", artist.Name),
+		"successfully saved with artist id:",
+		newArtistId,
+	)
+
+	for _, album := range artist.Albums {
+		newAlbumId, err := repositories.SaveAlbum(newArtistId, album)
+		if err != nil {
+			return fmt.Errorf("album %s not saved: %v", album.Name, err)
+		}
+		log.Println(
+			"Album",
+			fmt.Sprintf("\"%s\"", album.Name),
+			"sucessfully saved with album id:",
+			newAlbumId,
+		)
+
+		for _, track := range album.Tracks {
+			newTrackId, err := repositories.SaveTrack(newAlbumId, track)
+			if err != nil {
+				return fmt.Errorf("track %s not saved: %v", track.Name, err)
+			}
+			log.Println(
+				"Track",
+				fmt.Sprintf("\"%s\"", track.Name),
+				"sucessfully saved with track id:",
+				newTrackId,
+			)
+		}
+	}
+
+	for _, single := range artist.Singles {
+		newSingleId, err := repositories.SaveAlbum(newArtistId, single)
+		if err != nil {
+			return fmt.Errorf("single %s not saved: %v", single.Name, err)
+		}
+		log.Println(
+			"Single",
+			fmt.Sprintf("\"%s\"", single.Name),
+			"sucessfully saved with album id:",
+			newSingleId,
+		)
+
+		for _, track := range single.Tracks {
+			newTrackId, err := repositories.SaveTrack(newSingleId, track)
+			if err != nil {
+				return fmt.Errorf("track %s not saved: %v", track.Name, err)
+			}
+			log.Println(
+				"Track",
+				fmt.Sprintf("\"%s\"", track.Name),
+				"sucessfully saved with track id:",
+				newTrackId,
+			)
+		}
+	}
+
+	for _, compilation := range artist.Compilations {
+		newCompilationId, err := repositories.SaveAlbum(newArtistId, compilation)
+		if err != nil {
+			return fmt.Errorf("compilation %s not saved: %v", compilation.Name, err)
+		}
+		log.Println(
+			"Compilation",
+			fmt.Sprintf("\"%s\"", compilation.Name),
+			"sucessfully saved with album id:",
+			newCompilationId,
+		)
+
+		for _, track := range compilation.Tracks {
+			newTrackId, err := repositories.SaveTrack(newCompilationId, track)
+			if err != nil {
+				return fmt.Errorf("track %s not saved: %v", track.Name, err)
+			}
+			log.Println(
+				"Track",
+				fmt.Sprintf("\"%s\"", track.Name),
+				"sucessfully saved with track id:",
+				newTrackId,
+			)
+		}
+	}
+	return nil
+}
+
+func getArtistAlbums(artistId int, artistData *models.Artist) error {
+	var albums []models.Album
+	var singles []models.Album
+	var compilations []models.Album
+	albums, err := repositories.GetArtistAlbums(artistId)
+	if err != nil {
+		return fmt.Errorf("error in get artist albums: %v", err)
+	}
+
+	for i, album := range albums {
+		tracks, err := repositories.GetAlbumTracks(album.AlbumId)
+		if err != nil {
+			return fmt.Errorf("error in get album tracks: %v", err)
+		}
+		album.Tracks = tracks
+		if album.Type == "single" {
+			singles = append(singles, album)
+			albums = append(albums[:i], albums[i+1:]...)
+		} else if album.Type == "compilation" {
+			compilations = append(compilations, album)
+			albums = append(albums[:i], albums[i+1:]...)
+		}
+	}
+	artistData.Albums = albums
+	artistData.Singles = singles
+	artistData.Compilations = compilations
+	return nil
 }

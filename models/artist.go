@@ -3,13 +3,13 @@ package models
 import "time"
 
 type Artist struct {
-	DbId int `json:"dbId"`
-	Id                   string    `json:"id"`
+	ArtistId             int       `json:"artistId"`
+	SpotifyId            string    `json:"spotifyId"`
 	Name                 string    `json:"name"`
 	Popularity           int       `json:"popularity"`
 	Albums               []Album   `json:"albums"`
 	Singles              []Album   `json:"singles"`
-	Compilations         []Album   `josn:"compilations"`
+	Compilations         []Album   `json:"compilations"`
 	Genres               []string  `json:"genres"`
 	Url                  string    `json:"url"`
 	Followers            int       `json:"followers"`
@@ -28,8 +28,8 @@ type Artist struct {
 }
 
 type Album struct {
-	DbId int `json:"dbId"`
-	Id                   string    `json:"id"`
+	AlbumId              int       `json:"albumId"`
+	SpotifyId            string    `json:"spotifyId"`
 	Name                 string    `json:"name"`
 	Type                 string    `json:"type"`
 	ReleaseDate          string    `json:"releaseDate"`
@@ -47,8 +47,8 @@ type Album struct {
 }
 
 type Track struct {
-	DbId int `json:"dbId"`
-	Id               string    `json:"id"`
+	TrackId          int       `json:"trackId"`
+	SpotifyId        string    `json:"spotifyId"`
 	Name             string    `json:"name"`
 	Url              string    `json:"url"`
 	Danceability     float32   `json:"danceability"`
