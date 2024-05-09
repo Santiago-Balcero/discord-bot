@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -30,4 +31,8 @@ func MillisecondsToTime(ms int) string {
 	formattedTime := t.Format("15:04:05")
 
 	return formattedTime
+}
+
+func AddQuotes(words string) string {
+	return fmt.Sprintf("\"%s\"", words)
 }
