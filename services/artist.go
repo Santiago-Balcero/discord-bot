@@ -276,12 +276,10 @@ func getTrackUrl(trackName string, artist models.Artist) string {
 	for i := range discography {
 		for j := range discography[i].Tracks {
 			if trackName == discography[i].Tracks[j].Name {
-				fmt.Println("FOUND URL")
 				return discography[i].Tracks[j].Url
 			}
 		}
 	}
-	fmt.Println("TRACK NOT FOUND")
 	return ""
 }
 

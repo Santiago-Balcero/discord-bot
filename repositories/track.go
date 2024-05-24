@@ -49,6 +49,7 @@ func SaveTrack(albumId int, track models.Track) (int, error) {
 func GetAlbumTracks(albumId int) ([]models.Track, error) {
 	query :=
 		`SELECT
+			track_id,
 			spotify_id,
 			name,
 			url,
@@ -75,6 +76,7 @@ func GetAlbumTracks(albumId int) ([]models.Track, error) {
 	for result.Next() {
 		var track models.Track
 		err = result.Scan(
+			&track.TrackId,
 			&track.SpotifyId,
 			&track.Name,
 			&track.Url,

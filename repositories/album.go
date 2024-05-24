@@ -51,6 +51,7 @@ func SaveAlbum(artistId int, album models.Album) (int, error) {
 func GetArtistAlbums(artistId int) ([]models.Album, error) {
 	query :=
 		`SELECT
+			album_id,
 			spotify_id,
 			name,
 			type,
@@ -78,6 +79,7 @@ func GetArtistAlbums(artistId int) ([]models.Album, error) {
 	for result.Next() {
 		var album models.Album
 		err = result.Scan(
+			&album.AlbumId,
 			&album.SpotifyId,
 			&album.Name,
 			&album.Type,
