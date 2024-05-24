@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -14,6 +13,7 @@ var BotToken string
 var DiscordAppId string
 var DbUrl string
 var DbDriver string
+var Port string
 
 func LoadConfig() {
 	if dockerEnv := os.Getenv("DOCKER_ENV"); dockerEnv == "" {
@@ -23,9 +23,7 @@ func LoadConfig() {
 		}
 	}
 
-	port := os.Getenv("PORT")
-	log.Println("Assigned port:", port)
-	go http.ListenAndServe(":"+port, nil)
+	Port = os.Getenv("PORT")
 	SpotifyId = os.Getenv("SPOTIFY_ID")
 	SpotifySecret = os.Getenv("SPOTIFY_KEY")
 	BotToken = os.Getenv("BOT_TOKEN")
