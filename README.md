@@ -6,3 +6,7 @@ By Santiago Balcero
 - https://developer.spotify.com/
 - https://pkg.go.dev/github.com/zmb3/spotify
 - https://github.com/zmb3/spotify
+
+### Testing
+
+`go test -v -cover -coverprofile=c.out ./... && go tool cover -html=c.out -o coverage.html`

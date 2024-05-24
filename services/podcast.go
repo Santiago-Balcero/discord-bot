@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"discord-spotify-bot/constants"
 	"discord-spotify-bot/models"
 	"discord-spotify-bot/utils"
 
@@ -17,14 +18,14 @@ func GetPodcast(client *spotify.Client, podcastName string) (string, error) {
 	ctx := context.Background()
 	podcastData, err := searchPodcast(ctx, client, podcastName)
 	if err != nil {
-		return fmt.Sprintf("Podcast not found: %s", podcastName), err
+		return fmt.Sprint(constants.PodcastNotfound, podcastName), err
 	}
 	err = analysePodcast(ctx, client, &podcastData)
 	if err != nil {
-		return "Please try again in a few minutes.", err
+		return constants.TryAgain, err
 	}
 
-	return podcastToString(&podcastData), nil
+	return podcastDataToResponse(&podcastData), nil
 }
 
 func searchPodcast(
@@ -98,7 +99,7 @@ func analysePodcast(
 	return nil
 }
 
-func podcastToString(podcast *models.Podcast) string {
+func podcastDataToResponse(podcast *models.Podcast) string {
 	publisher := fmt.Sprintf("**Publisher:** %s", podcast.Publisher)
 	description := fmt.Sprintf("**Description:** %s", podcast.Description)
 	episodes := fmt.Sprintf("Total episodes: %v", podcast.EpisodesCount)

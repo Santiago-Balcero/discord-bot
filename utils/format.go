@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -17,10 +18,6 @@ func FormatInteger(num int) string {
 	}
 	formattedStr = numStr[:length-3*dots] + formattedStr
 
-	if formattedStr[0] == '.' {
-		formattedStr = formattedStr[1:]
-	}
-
 	return formattedStr
 }
 
@@ -34,4 +31,8 @@ func MillisecondsToTime(ms int) string {
 	formattedTime := t.Format("15:04:05")
 
 	return formattedTime
+}
+
+func AddQuotes(words string) string {
+	return fmt.Sprintf("\"%s\"", words)
 }

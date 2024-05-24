@@ -1,9 +1,7 @@
 package utils
 
-import "log"
+import "fmt"
 
-func CheckError(err error) {
-	if err != nil {
-		log.Println(err)
-	}
+func NotSavedError(model, name string, err error) error {
+	return fmt.Errorf("%s %s not saved: %v", model, name, err)
 }
