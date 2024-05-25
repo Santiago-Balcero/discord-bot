@@ -369,15 +369,16 @@ func artistDataToResponse(artist models.Artist) string {
 	if artist.CompilationsCount > 0 {
 		compilationsInfo = "\n\n**Compilations:**"
 		for i := range artist.Compilations {
-			compilationsInfo += fmt.Sprintf(
-				"\n\t• %s (%s) - track: %s.",
-				artist.Compilations[i].Name,
-				strings.Split(artist.Compilations[i].ReleaseDate, "-")[0],
-				artist.Compilations[i].Tracks[0].Name,
-			)
+			if len(artist.Compilations[i].Tracks) > 0 {
+				compilationsInfo += fmt.Sprintf(
+					"\n\t• %s (%s) - track: %s.",
+					artist.Compilations[i].Name,
+					strings.Split(artist.Compilations[i].ReleaseDate, "-")[0],
+					artist.Compilations[i].Tracks[0].Name,
+				)
+			}
 		}
 	}
-
 	artistStr := fmt.Sprintf(
 		"%s\n%s\n\n%s\n%s\n%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s%s%s",
 		fmt.Sprintf("**%s**", strings.ToUpper(artist.Name)),
